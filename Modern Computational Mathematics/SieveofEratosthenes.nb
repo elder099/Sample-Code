@@ -1,0 +1,3433 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     66411,       3423]
+NotebookOptionsPosition[     64922,       3366]
+NotebookOutlinePosition[     65467,       3388]
+CellTagsIndexPosition[     65424,       3385]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Sieve of Eratosthenes", "Title"],
+
+Cell[CellGroupData[{
+
+Cell["Author", "Subsection"],
+
+Cell["\<\
+Eric W. Weisstein
+June 26, 2004\
+\>", "Text"],
+
+Cell[TextData[{
+ "This notebook downloaded from ",
+ ButtonBox["http://mathworld.wolfram.com/notebooks/PrimeNumbers/\
+SieveofEratosthenes.nb",
+  BaseStyle->"Hyperlink",
+  ButtonData:>{
+    URL["http://mathworld.wolfram.com/notebooks/PrimeNumbers/\
+SieveofEratosthenes.nb"], None}],
+ "."
+}], "Text"],
+
+Cell[TextData[{
+ "For more information, see Eric's ",
+ StyleBox["MathWorld",
+  FontSlant->"Italic"],
+ " entry ",
+ ButtonBox["http://mathworld.wolfram.com/SieveofEratosthenes.html",
+  BaseStyle->"Hyperlink",
+  ButtonData:>{
+    URL["http://mathworld.wolfram.com/SieveofEratosthenes.html"], None}],
+ "."
+}], "Text"],
+
+Cell["\<\
+\[Copyright]2005 Wolfram Research, Inc. except for portions noted otherwise\
+\>", "Text"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Code", "Subsection"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Factors", "[", "n_", "]"}], ":=", 
+  RowBox[{"First", "/@", 
+   RowBox[{"FactorInteger", "[", "n", "]"}]}]}]], "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Comments", "Subsection"],
+
+Cell["The EratosthenesSieve code is ugly and should be rewritten", "Text"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Code", "Subsection"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"EratosthenesSieve", "[", 
+    RowBox[{
+     RowBox[{"x_Integer", "?", "Positive"}], ",", 
+     RowBox[{"y_Integer", "?", "Positive"}], ",", 
+     RowBox[{"max_:", "Infinity"}], ",", "opts___"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"num", ",", "facs", ",", "i", ",", "j", ",", "k", ",", "n", ",", 
+       RowBox[{"yoff", "=", "0.4"}], ",", 
+       RowBox[{"ystart", "=", "0.3"}], ",", 
+       RowBox[{"xoff", "=", "0.3"}], ",", 
+       RowBox[{"xsep", "=", "0.25"}], ",", 
+       RowBox[{"slashes", "=", 
+        RowBox[{"{", "}"}]}]}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"num", "=", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"Text", "[", 
+          RowBox[{
+           RowBox[{"i", "+", 
+            RowBox[{
+             RowBox[{"(", 
+              RowBox[{"j", "-", "1"}], ")"}], "*", "x"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"i", ",", 
+             RowBox[{"-", "j"}]}], "}"}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"j", ",", "1", ",", "y"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", "x"}], "}"}]}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"For", "[", 
+       RowBox[{
+        RowBox[{"j", "=", "1"}], ",", 
+        RowBox[{"j", "\[LessEqual]", "y"}], ",", 
+        RowBox[{"j", "++"}], ",", 
+        RowBox[{"For", "[", 
+         RowBox[{
+          RowBox[{"i", "=", "1"}], ",", 
+          RowBox[{"i", "\[LessEqual]", "x"}], ",", 
+          RowBox[{"i", "++"}], ",", 
+          RowBox[{
+           RowBox[{"n", "=", 
+            RowBox[{"i", "+", 
+             RowBox[{
+              RowBox[{"(", 
+               RowBox[{"j", "-", "1"}], ")"}], "*", "x"}]}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"!", 
+              RowBox[{"PrimeQ", "[", "n", "]"}]}], ",", 
+             RowBox[{
+              RowBox[{"facs", "=", 
+               RowBox[{"Factors", "[", "n", "]"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"k", "=", "1"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"While", "[", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"k", "\[LessEqual]", 
+                  RowBox[{"Length", "[", "facs", "]"}]}], "&&", 
+                 RowBox[{
+                  RowBox[{"facs", "[", 
+                   RowBox[{"[", "k", "]"}], "]"}], "\[LessEqual]", "max"}]}], 
+                ",", 
+                RowBox[{"k", "++"}]}], "]"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"facs", "=", 
+               RowBox[{"Take", "[", 
+                RowBox[{"facs", ",", 
+                 RowBox[{"k", "-", "1"}]}], "]"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"len", "=", 
+               RowBox[{"Length", "[", "facs", "]"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"For", "[", 
+               RowBox[{
+                RowBox[{"k", "=", "1"}], ",", 
+                RowBox[{"k", "\[LessEqual]", "len"}], ",", 
+                RowBox[{"k", "++"}], ",", 
+                RowBox[{
+                 RowBox[{"xpos", "=", 
+                  RowBox[{"i", "+", 
+                   RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{"k", "-", "1", "-", 
+                    RowBox[{".5", 
+                    RowBox[{"(", 
+                    RowBox[{"len", "-", "1"}], ")"}]}]}], ")"}], "xsep"}]}]}],
+                  ";", "\[IndentingNewLine]", 
+                 RowBox[{"slashes", "=", 
+                  RowBox[{"Append", "[", 
+                   RowBox[{"slashes", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"Text", "[", 
+                    RowBox[{
+                    RowBox[{"FontForm", "[", 
+                    RowBox[{
+                    RowBox[{"facs", "[", 
+                    RowBox[{"[", "k", "]"}], "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"\"\<Times-Roman\>\"", ",", "9"}], "}"}]}], "]"}],
+                     ",", 
+                    RowBox[{"{", 
+                    RowBox[{"xpos", ",", 
+                    RowBox[{
+                    RowBox[{"-", "j"}], "-", "yoff"}]}], "}"}]}], "]"}], ",", 
+                    
+                    RowBox[{"Line", "[", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"xpos", ",", 
+                    RowBox[{
+                    RowBox[{"-", "j"}], "-", "ystart"}]}], "}"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"xpos", ",", 
+                    RowBox[{
+                    RowBox[{"-", "j"}], "+", "ystart"}]}], "}"}]}], "}"}], 
+                    "]"}]}], "}"}]}], "]"}]}], ";"}]}], "]"}]}]}], "]"}]}]}], 
+         "]"}]}], "]"}], ";", "\[IndentingNewLine]", 
+      RowBox[{"Graphics", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"num", ",", "slashes"}], "}"}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", "All"}], ",", 
+        RowBox[{"AspectRatio", "\[Rule]", "Automatic"}], ",", "opts"}], 
+       "]"}]}]}], "]"}]}], "\n"}], "\n", 
+ RowBox[{
+  RowBox[{"EratosthenesSieveArray", "[", 
+   RowBox[{
+    RowBox[{"x_Integer", "?", "Positive"}], ",", 
+    RowBox[{"y_Integer", "?", "Positive"}], ",", "n_Integer"}], "]"}], ":=", 
+  RowBox[{"Show", "[", 
+   RowBox[{
+    RowBox[{"GraphicsArray", "[", 
+     RowBox[{"Partition", "[", 
+      RowBox[{
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"EratosthenesSieve", "[", 
+          RowBox[{"10", ",", "5", ",", 
+           RowBox[{"Prime", "[", "i", "]"}], ",", 
+           RowBox[{"DisplayFunction", "\[Rule]", "Identity"}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", "n"}], "}"}]}], "]"}], ",", "2"}], 
+      "]"}], "]"}], ",", 
+    RowBox[{"DisplayFunction", "\[Rule]", "$DisplayFunction"}]}], 
+   "]"}]}]}], "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Code", "Subsection"],
+
+Cell["\<\
+From Sam Blake
+Feb. 21, 2007\
+\>", "Text"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"prime", "[", 
+    RowBox[{"lst_", ",", "n_"}], "]"}], ":=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Join", "[", 
+      RowBox[{
+       RowBox[{"lst", "[", 
+        RowBox[{"[", 
+         RowBox[{";;", "n"}], "]"}], "]"}], ",", 
+       RowBox[{
+        RowBox[{"Reap", "[", 
+         RowBox[{"Scan", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"!", 
+               RowBox[{"IntegerQ", "[", 
+                RowBox[{"#", "/", 
+                 RowBox[{"lst", "[", 
+                  RowBox[{"[", "n", "]"}], "]"}]}], "]"}]}], ",", 
+              RowBox[{"Sow", "[", "#", "]"}]}], "]"}], "&"}], ",", 
+           RowBox[{"lst", "[", 
+            RowBox[{"[", 
+             RowBox[{"n", ";;"}], "]"}], "]"}]}], "]"}], "]"}], "[", 
+        RowBox[{"[", 
+         RowBox[{"2", ",", "1"}], "]"}], "]"}]}], "]"}], ",", 
+     RowBox[{"n", "+", "1"}]}], "}"}]}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"sieve", "[", "n_", "]"}], ":=", 
+  RowBox[{"Rest", "@", 
+   RowBox[{"First", "@", 
+    RowBox[{"NestWhile", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"prime", "[", 
+        RowBox[{
+         RowBox[{"First", "[", "#", "]"}], ",", 
+         RowBox[{"Last", "[", "#", "]"}]}], "]"}], "&"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Range", "[", "n", "]"}], ",", "2"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Length", "[", 
+         RowBox[{"First", "[", "#", "]"}], "]"}], ">", 
+        RowBox[{"Last", "[", "#", "]"}]}], "&"}]}], "]"}]}]}]}]}], "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Graphic", "Section"],
+
+Cell[CellGroupData[{
+
+Cell["EratosthenesSieveArray[10,5,4]", "Input",
+ AspectRatioFixed->True],
+
+Cell[GraphicsData["PostScript", "\<\
+%!
+%%Creator: Mathematica
+%%AspectRatio: .52222 
+MathPictureStart
+%% Graphics
+/Courier findfont 10  scalefont  setfont
+% Scaling calculations
+0.0238095 0.47619 0.0124339 0.47619 [
+[ 0 0 0 0 ]
+[ 1 .52222 0 0 ]
+] MathScale
+% Start of Graphics
+1 setlinecap
+1 setlinejoin
+newpath
+[ ] 0 setdash
+0 g
+p
+P
+0 0 m
+1 0 L
+1 .52222 L
+0 .52222 L
+closepath
+clip
+newpath
+p
+p
+% Start of sub-graphic
+p
+0.0238095 0.0124339 0.477324 0.249269 MathSubStart
+%% Graphics
+/Courier findfont 10  scalefont  setfont
+% Scaling calculations
+-0.0791506 0.10296 0.568082 0.10296 [
+[(1)] .02381 .46512 0 0 Msboxa
+[(2)] .12677 .46512 0 0 Msboxa
+[(3)] .22973 .46512 0 0 Msboxa
+[(4)] .33269 .46512 0 0 Msboxa
+[(5)] .43565 .46512 0 0 Msboxa
+[(6)] .53861 .46512 0 0 Msboxa
+[(7)] .64157 .46512 0 0 Msboxa
+[(8)] .74453 .46512 0 0 Msboxa
+[(9)] .84749 .46512 0 0 Msboxa
+[(10)] .95045 .46512 0 0 Msboxa
+[(11)] .02381 .36216 0 0 Msboxa
+[(12)] .12677 .36216 0 0 Msboxa
+[(13)] .22973 .36216 0 0 Msboxa
+[(14)] .33269 .36216 0 0 Msboxa
+[(15)] .43565 .36216 0 0 Msboxa
+[(16)] .53861 .36216 0 0 Msboxa
+[(17)] .64157 .36216 0 0 Msboxa
+[(18)] .74453 .36216 0 0 Msboxa
+[(19)] .84749 .36216 0 0 Msboxa
+[(20)] .95045 .36216 0 0 Msboxa
+[(21)] .02381 .2592 0 0 Msboxa
+[(22)] .12677 .2592 0 0 Msboxa
+[(23)] .22973 .2592 0 0 Msboxa
+[(24)] .33269 .2592 0 0 Msboxa
+[(25)] .43565 .2592 0 0 Msboxa
+[(26)] .53861 .2592 0 0 Msboxa
+[(27)] .64157 .2592 0 0 Msboxa
+[(28)] .74453 .2592 0 0 Msboxa
+[(29)] .84749 .2592 0 0 Msboxa
+[(30)] .95045 .2592 0 0 Msboxa
+[(31)] .02381 .15624 0 0 Msboxa
+[(32)] .12677 .15624 0 0 Msboxa
+[(33)] .22973 .15624 0 0 Msboxa
+[(34)] .33269 .15624 0 0 Msboxa
+[(35)] .43565 .15624 0 0 Msboxa
+[(36)] .53861 .15624 0 0 Msboxa
+[(37)] .64157 .15624 0 0 Msboxa
+[(38)] .74453 .15624 0 0 Msboxa
+[(39)] .84749 .15624 0 0 Msboxa
+[(40)] .95045 .15624 0 0 Msboxa
+[(41)] .02381 .05328 0 0 Msboxa
+[(42)] .12677 .05328 0 0 Msboxa
+[(43)] .22973 .05328 0 0 Msboxa
+[(44)] .33269 .05328 0 0 Msboxa
+[(45)] .43565 .05328 0 0 Msboxa
+[(46)] .53861 .05328 0 0 Msboxa
+[(47)] .64157 .05328 0 0 Msboxa
+[(48)] .74453 .05328 0 0 Msboxa
+[(49)] .84749 .05328 0 0 Msboxa
+[(50)] .95045 .05328 0 0 Msboxa
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .52574 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55148 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74453 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84749 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .42394 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1139 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .13964 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .42278 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .44852 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53861 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73166 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .7574 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .32098 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .02381 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12677 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .31982 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .34556 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .43565 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53861 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .64157 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74453 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .92471 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .95045 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .97619 .21802 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12677 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .22973 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .43565 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .52574 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55148 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74453 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84749 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .11506 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1139 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .13964 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .42278 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .44852 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53861 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73166 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .7574 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .0121 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .0121 0 0 Msboxa
+P
+[ 0 0 0 0 ]
+[ 1 .50811 0 0 ]
+] MathScale
+% Start of Graphics
+1 setlinecap
+1 setlinejoin
+newpath
+[ ] 0 setdash
+p
+P
+p
+p
+p
+[(1)] .02381 .46512 0 0 Mshowa
+[(2)] .12677 .46512 0 0 Mshowa
+[(3)] .22973 .46512 0 0 Mshowa
+[(4)] .33269 .46512 0 0 Mshowa
+[(5)] .43565 .46512 0 0 Mshowa
+[(6)] .53861 .46512 0 0 Mshowa
+[(7)] .64157 .46512 0 0 Mshowa
+[(8)] .74453 .46512 0 0 Mshowa
+[(9)] .84749 .46512 0 0 Mshowa
+[(10)] .95045 .46512 0 0 Mshowa
+P
+p
+[(11)] .02381 .36216 0 0 Mshowa
+[(12)] .12677 .36216 0 0 Mshowa
+[(13)] .22973 .36216 0 0 Mshowa
+[(14)] .33269 .36216 0 0 Mshowa
+[(15)] .43565 .36216 0 0 Mshowa
+[(16)] .53861 .36216 0 0 Mshowa
+[(17)] .64157 .36216 0 0 Mshowa
+[(18)] .74453 .36216 0 0 Mshowa
+[(19)] .84749 .36216 0 0 Mshowa
+[(20)] .95045 .36216 0 0 Mshowa
+P
+p
+[(21)] .02381 .2592 0 0 Mshowa
+[(22)] .12677 .2592 0 0 Mshowa
+[(23)] .22973 .2592 0 0 Mshowa
+[(24)] .33269 .2592 0 0 Mshowa
+[(25)] .43565 .2592 0 0 Mshowa
+[(26)] .53861 .2592 0 0 Mshowa
+[(27)] .64157 .2592 0 0 Mshowa
+[(28)] .74453 .2592 0 0 Mshowa
+[(29)] .84749 .2592 0 0 Mshowa
+[(30)] .95045 .2592 0 0 Mshowa
+P
+p
+[(31)] .02381 .15624 0 0 Mshowa
+[(32)] .12677 .15624 0 0 Mshowa
+[(33)] .22973 .15624 0 0 Mshowa
+[(34)] .33269 .15624 0 0 Mshowa
+[(35)] .43565 .15624 0 0 Mshowa
+[(36)] .53861 .15624 0 0 Mshowa
+[(37)] .64157 .15624 0 0 Mshowa
+[(38)] .74453 .15624 0 0 Mshowa
+[(39)] .84749 .15624 0 0 Mshowa
+[(40)] .95045 .15624 0 0 Mshowa
+P
+p
+[(41)] .02381 .05328 0 0 Mshowa
+[(42)] .12677 .05328 0 0 Mshowa
+[(43)] .22973 .05328 0 0 Mshowa
+[(44)] .33269 .05328 0 0 Mshowa
+[(45)] .43565 .05328 0 0 Mshowa
+[(46)] .53861 .05328 0 0 Mshowa
+[(47)] .64157 .05328 0 0 Mshowa
+[(48)] .74453 .05328 0 0 Mshowa
+[(49)] .84749 .05328 0 0 Mshowa
+[(50)] .95045 .05328 0 0 Mshowa
+P
+P
+p
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .42394 0 0 Mshowa
+P
+.004 w
+.33269 .43423 m
+.33269 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .52574 .42394 0 0 Mshowa
+P
+.004 w
+.52574 .43423 m
+.52574 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55148 .42394 0 0 Mshowa
+P
+.004 w
+.55148 .43423 m
+.55148 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74453 .42394 0 0 Mshowa
+P
+.004 w
+.74453 .43423 m
+.74453 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84749 .42394 0 0 Mshowa
+P
+.004 w
+.84749 .43423 m
+.84749 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .42394 0 0 Mshowa
+P
+.004 w
+.93758 .43423 m
+.93758 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .42394 0 0 Mshowa
+P
+.004 w
+.96332 .43423 m
+.96332 .49601 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1139 .32098 0 0 Mshowa
+P
+.004 w
+.1139 .33127 m
+.1139 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .13964 .32098 0 0 Mshowa
+P
+.004 w
+.13964 .33127 m
+.13964 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .32098 0 0 Mshowa
+P
+.004 w
+.33269 .33127 m
+.33269 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .42278 .32098 0 0 Mshowa
+P
+.004 w
+.42278 .33127 m
+.42278 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .44852 .32098 0 0 Mshowa
+P
+.004 w
+.44852 .33127 m
+.44852 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53861 .32098 0 0 Mshowa
+P
+.004 w
+.53861 .33127 m
+.53861 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73166 .32098 0 0 Mshowa
+P
+.004 w
+.73166 .33127 m
+.73166 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .7574 .32098 0 0 Mshowa
+P
+.004 w
+.7574 .33127 m
+.7574 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .32098 0 0 Mshowa
+P
+.004 w
+.93758 .33127 m
+.93758 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .32098 0 0 Mshowa
+P
+.004 w
+.96332 .33127 m
+.96332 .39305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .02381 .21802 0 0 Mshowa
+P
+.004 w
+.02381 .22831 m
+.02381 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12677 .21802 0 0 Mshowa
+P
+.004 w
+.12677 .22831 m
+.12677 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .31982 .21802 0 0 Mshowa
+P
+.004 w
+.31982 .22831 m
+.31982 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .34556 .21802 0 0 Mshowa
+P
+.004 w
+.34556 .22831 m
+.34556 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .43565 .21802 0 0 Mshowa
+P
+.004 w
+.43565 .22831 m
+.43565 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53861 .21802 0 0 Mshowa
+P
+.004 w
+.53861 .22831 m
+.53861 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .64157 .21802 0 0 Mshowa
+P
+.004 w
+.64157 .22831 m
+.64157 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74453 .21802 0 0 Mshowa
+P
+.004 w
+.74453 .22831 m
+.74453 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .92471 .21802 0 0 Mshowa
+P
+.004 w
+.92471 .22831 m
+.92471 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .95045 .21802 0 0 Mshowa
+P
+.004 w
+.95045 .22831 m
+.95045 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .97619 .21802 0 0 Mshowa
+P
+.004 w
+.97619 .22831 m
+.97619 .29009 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12677 .11506 0 0 Mshowa
+P
+.004 w
+.12677 .12535 m
+.12677 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .22973 .11506 0 0 Mshowa
+P
+.004 w
+.22973 .12535 m
+.22973 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .11506 0 0 Mshowa
+P
+.004 w
+.33269 .12535 m
+.33269 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .43565 .11506 0 0 Mshowa
+P
+.004 w
+.43565 .12535 m
+.43565 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .52574 .11506 0 0 Mshowa
+P
+.004 w
+.52574 .12535 m
+.52574 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55148 .11506 0 0 Mshowa
+P
+.004 w
+.55148 .12535 m
+.55148 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74453 .11506 0 0 Mshowa
+P
+.004 w
+.74453 .12535 m
+.74453 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84749 .11506 0 0 Mshowa
+P
+.004 w
+.84749 .12535 m
+.84749 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .11506 0 0 Mshowa
+P
+.004 w
+.93758 .12535 m
+.93758 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .11506 0 0 Mshowa
+P
+.004 w
+.96332 .12535 m
+.96332 .18713 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1139 .0121 0 0 Mshowa
+P
+.004 w
+.1139 .02239 m
+.1139 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .13964 .0121 0 0 Mshowa
+P
+.004 w
+.13964 .02239 m
+.13964 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33269 .0121 0 0 Mshowa
+P
+.004 w
+.33269 .02239 m
+.33269 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .42278 .0121 0 0 Mshowa
+P
+.004 w
+.42278 .02239 m
+.42278 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .44852 .0121 0 0 Mshowa
+P
+.004 w
+.44852 .02239 m
+.44852 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53861 .0121 0 0 Mshowa
+P
+.004 w
+.53861 .02239 m
+.53861 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73166 .0121 0 0 Mshowa
+P
+.004 w
+.73166 .02239 m
+.73166 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .7574 .0121 0 0 Mshowa
+P
+.004 w
+.7574 .02239 m
+.7574 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .93758 .0121 0 0 Mshowa
+P
+.004 w
+.93758 .02239 m
+.93758 .08417 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96332 .0121 0 0 Mshowa
+P
+.004 w
+.96332 .02239 m
+.96332 .08417 L
+s
+P
+P
+P
+0 0 m
+1 0 L
+1 .50811 L
+0 .50811 L
+closepath
+clip
+newpath
+MathSubEnd
+P
+% End of sub-graphic
+% Start of sub-graphic
+p
+0.522676 0.0124339 0.97619 0.249269 MathSubStart
+%% Graphics
+/Courier findfont 10  scalefont  setfont
+% Scaling calculations
+-0.0650794 0.101587 0.560508 0.101587 [
+[(1)] .03651 .45892 0 0 Msboxa
+[(2)] .1381 .45892 0 0 Msboxa
+[(3)] .23968 .45892 0 0 Msboxa
+[(4)] .34127 .45892 0 0 Msboxa
+[(5)] .44286 .45892 0 0 Msboxa
+[(6)] .54444 .45892 0 0 Msboxa
+[(7)] .64603 .45892 0 0 Msboxa
+[(8)] .74762 .45892 0 0 Msboxa
+[(9)] .84921 .45892 0 0 Msboxa
+[(10)] .95079 .45892 0 0 Msboxa
+[(11)] .03651 .35733 0 0 Msboxa
+[(12)] .1381 .35733 0 0 Msboxa
+[(13)] .23968 .35733 0 0 Msboxa
+[(14)] .34127 .35733 0 0 Msboxa
+[(15)] .44286 .35733 0 0 Msboxa
+[(16)] .54444 .35733 0 0 Msboxa
+[(17)] .64603 .35733 0 0 Msboxa
+[(18)] .74762 .35733 0 0 Msboxa
+[(19)] .84921 .35733 0 0 Msboxa
+[(20)] .95079 .35733 0 0 Msboxa
+[(21)] .03651 .25575 0 0 Msboxa
+[(22)] .1381 .25575 0 0 Msboxa
+[(23)] .23968 .25575 0 0 Msboxa
+[(24)] .34127 .25575 0 0 Msboxa
+[(25)] .44286 .25575 0 0 Msboxa
+[(26)] .54444 .25575 0 0 Msboxa
+[(27)] .64603 .25575 0 0 Msboxa
+[(28)] .74762 .25575 0 0 Msboxa
+[(29)] .84921 .25575 0 0 Msboxa
+[(30)] .95079 .25575 0 0 Msboxa
+[(31)] .03651 .15416 0 0 Msboxa
+[(32)] .1381 .15416 0 0 Msboxa
+[(33)] .23968 .15416 0 0 Msboxa
+[(34)] .34127 .15416 0 0 Msboxa
+[(35)] .44286 .15416 0 0 Msboxa
+[(36)] .54444 .15416 0 0 Msboxa
+[(37)] .64603 .15416 0 0 Msboxa
+[(38)] .74762 .15416 0 0 Msboxa
+[(39)] .84921 .15416 0 0 Msboxa
+[(40)] .95079 .15416 0 0 Msboxa
+[(41)] .03651 .05257 0 0 Msboxa
+[(42)] .1381 .05257 0 0 Msboxa
+[(43)] .23968 .05257 0 0 Msboxa
+[(44)] .34127 .05257 0 0 Msboxa
+[(45)] .44286 .05257 0 0 Msboxa
+[(46)] .54444 .05257 0 0 Msboxa
+[(47)] .64603 .05257 0 0 Msboxa
+[(48)] .74762 .05257 0 0 Msboxa
+[(49)] .84921 .05257 0 0 Msboxa
+[(50)] .95079 .05257 0 0 Msboxa
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53175 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55714 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74762 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84921 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .41829 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1254 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .15079 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .32857 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .35397 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .43016 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .45556 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54444 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73492 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76032 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .3167 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .02381 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .04921 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1381 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .32857 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .35397 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .44286 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54444 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .64603 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73492 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .76032 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9254 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .95079 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .97619 .21511 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1381 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .23968 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .43016 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .45556 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53175 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55714 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74762 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84921 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .11352 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1127 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .1381 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .16349 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .43016 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .45556 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54444 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73492 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76032 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .84921 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .01194 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .01194 0 0 Msboxa
+P
+[ 0 0 0 0 ]
+[ 1 .50133 0 0 ]
+] MathScale
+% Start of Graphics
+1 setlinecap
+1 setlinejoin
+newpath
+[ ] 0 setdash
+p
+P
+p
+p
+p
+[(1)] .03651 .45892 0 0 Mshowa
+[(2)] .1381 .45892 0 0 Mshowa
+[(3)] .23968 .45892 0 0 Mshowa
+[(4)] .34127 .45892 0 0 Mshowa
+[(5)] .44286 .45892 0 0 Mshowa
+[(6)] .54444 .45892 0 0 Mshowa
+[(7)] .64603 .45892 0 0 Mshowa
+[(8)] .74762 .45892 0 0 Mshowa
+[(9)] .84921 .45892 0 0 Mshowa
+[(10)] .95079 .45892 0 0 Mshowa
+P
+p
+[(11)] .03651 .35733 0 0 Mshowa
+[(12)] .1381 .35733 0 0 Mshowa
+[(13)] .23968 .35733 0 0 Mshowa
+[(14)] .34127 .35733 0 0 Mshowa
+[(15)] .44286 .35733 0 0 Mshowa
+[(16)] .54444 .35733 0 0 Mshowa
+[(17)] .64603 .35733 0 0 Mshowa
+[(18)] .74762 .35733 0 0 Mshowa
+[(19)] .84921 .35733 0 0 Mshowa
+[(20)] .95079 .35733 0 0 Mshowa
+P
+p
+[(21)] .03651 .25575 0 0 Mshowa
+[(22)] .1381 .25575 0 0 Mshowa
+[(23)] .23968 .25575 0 0 Mshowa
+[(24)] .34127 .25575 0 0 Mshowa
+[(25)] .44286 .25575 0 0 Mshowa
+[(26)] .54444 .25575 0 0 Mshowa
+[(27)] .64603 .25575 0 0 Mshowa
+[(28)] .74762 .25575 0 0 Mshowa
+[(29)] .84921 .25575 0 0 Mshowa
+[(30)] .95079 .25575 0 0 Mshowa
+P
+p
+[(31)] .03651 .15416 0 0 Mshowa
+[(32)] .1381 .15416 0 0 Mshowa
+[(33)] .23968 .15416 0 0 Mshowa
+[(34)] .34127 .15416 0 0 Mshowa
+[(35)] .44286 .15416 0 0 Mshowa
+[(36)] .54444 .15416 0 0 Mshowa
+[(37)] .64603 .15416 0 0 Mshowa
+[(38)] .74762 .15416 0 0 Mshowa
+[(39)] .84921 .15416 0 0 Mshowa
+[(40)] .95079 .15416 0 0 Mshowa
+P
+p
+[(41)] .03651 .05257 0 0 Mshowa
+[(42)] .1381 .05257 0 0 Mshowa
+[(43)] .23968 .05257 0 0 Mshowa
+[(44)] .34127 .05257 0 0 Mshowa
+[(45)] .44286 .05257 0 0 Mshowa
+[(46)] .54444 .05257 0 0 Mshowa
+[(47)] .64603 .05257 0 0 Mshowa
+[(48)] .74762 .05257 0 0 Mshowa
+[(49)] .84921 .05257 0 0 Mshowa
+[(50)] .95079 .05257 0 0 Mshowa
+P
+P
+p
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .41829 0 0 Mshowa
+P
+.004 w
+.34127 .42844 m
+.34127 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53175 .41829 0 0 Mshowa
+P
+.004 w
+.53175 .42844 m
+.53175 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55714 .41829 0 0 Mshowa
+P
+.004 w
+.55714 .42844 m
+.55714 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74762 .41829 0 0 Mshowa
+P
+.004 w
+.74762 .42844 m
+.74762 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84921 .41829 0 0 Mshowa
+P
+.004 w
+.84921 .42844 m
+.84921 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .41829 0 0 Mshowa
+P
+.004 w
+.9381 .42844 m
+.9381 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .41829 0 0 Mshowa
+P
+.004 w
+.96349 .42844 m
+.96349 .4894 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1254 .3167 0 0 Mshowa
+P
+.004 w
+.1254 .32686 m
+.1254 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .15079 .3167 0 0 Mshowa
+P
+.004 w
+.15079 .32686 m
+.15079 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .32857 .3167 0 0 Mshowa
+P
+.004 w
+.32857 .32686 m
+.32857 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .35397 .3167 0 0 Mshowa
+P
+.004 w
+.35397 .32686 m
+.35397 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .43016 .3167 0 0 Mshowa
+P
+.004 w
+.43016 .32686 m
+.43016 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .45556 .3167 0 0 Mshowa
+P
+.004 w
+.45556 .32686 m
+.45556 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54444 .3167 0 0 Mshowa
+P
+.004 w
+.54444 .32686 m
+.54444 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73492 .3167 0 0 Mshowa
+P
+.004 w
+.73492 .32686 m
+.73492 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76032 .3167 0 0 Mshowa
+P
+.004 w
+.76032 .32686 m
+.76032 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .3167 0 0 Mshowa
+P
+.004 w
+.9381 .32686 m
+.9381 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .3167 0 0 Mshowa
+P
+.004 w
+.96349 .32686 m
+.96349 .38781 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .02381 .21511 0 0 Mshowa
+P
+.004 w
+.02381 .22527 m
+.02381 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .04921 .21511 0 0 Mshowa
+P
+.004 w
+.04921 .22527 m
+.04921 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1381 .21511 0 0 Mshowa
+P
+.004 w
+.1381 .22527 m
+.1381 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .32857 .21511 0 0 Mshowa
+P
+.004 w
+.32857 .22527 m
+.32857 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .35397 .21511 0 0 Mshowa
+P
+.004 w
+.35397 .22527 m
+.35397 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .44286 .21511 0 0 Mshowa
+P
+.004 w
+.44286 .22527 m
+.44286 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54444 .21511 0 0 Mshowa
+P
+.004 w
+.54444 .22527 m
+.54444 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .64603 .21511 0 0 Mshowa
+P
+.004 w
+.64603 .22527 m
+.64603 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73492 .21511 0 0 Mshowa
+P
+.004 w
+.73492 .22527 m
+.73492 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .76032 .21511 0 0 Mshowa
+P
+.004 w
+.76032 .22527 m
+.76032 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9254 .21511 0 0 Mshowa
+P
+.004 w
+.9254 .22527 m
+.9254 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .95079 .21511 0 0 Mshowa
+P
+.004 w
+.95079 .22527 m
+.95079 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .97619 .21511 0 0 Mshowa
+P
+.004 w
+.97619 .22527 m
+.97619 .28622 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1381 .11352 0 0 Mshowa
+P
+.004 w
+.1381 .12368 m
+.1381 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .23968 .11352 0 0 Mshowa
+P
+.004 w
+.23968 .12368 m
+.23968 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .11352 0 0 Mshowa
+P
+.004 w
+.34127 .12368 m
+.34127 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .43016 .11352 0 0 Mshowa
+P
+.004 w
+.43016 .12368 m
+.43016 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .45556 .11352 0 0 Mshowa
+P
+.004 w
+.45556 .12368 m
+.45556 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53175 .11352 0 0 Mshowa
+P
+.004 w
+.53175 .12368 m
+.53175 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55714 .11352 0 0 Mshowa
+P
+.004 w
+.55714 .12368 m
+.55714 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74762 .11352 0 0 Mshowa
+P
+.004 w
+.74762 .12368 m
+.74762 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .84921 .11352 0 0 Mshowa
+P
+.004 w
+.84921 .12368 m
+.84921 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .11352 0 0 Mshowa
+P
+.004 w
+.9381 .12368 m
+.9381 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .11352 0 0 Mshowa
+P
+.004 w
+.96349 .12368 m
+.96349 .18463 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .1127 .01194 0 0 Mshowa
+P
+.004 w
+.1127 .0221 m
+.1127 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .1381 .01194 0 0 Mshowa
+P
+.004 w
+.1381 .0221 m
+.1381 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .16349 .01194 0 0 Mshowa
+P
+.004 w
+.16349 .0221 m
+.16349 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .01194 0 0 Mshowa
+P
+.004 w
+.34127 .0221 m
+.34127 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .43016 .01194 0 0 Mshowa
+P
+.004 w
+.43016 .0221 m
+.43016 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .45556 .01194 0 0 Mshowa
+P
+.004 w
+.45556 .0221 m
+.45556 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54444 .01194 0 0 Mshowa
+P
+.004 w
+.54444 .0221 m
+.54444 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .73492 .01194 0 0 Mshowa
+P
+.004 w
+.73492 .0221 m
+.73492 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76032 .01194 0 0 Mshowa
+P
+.004 w
+.76032 .0221 m
+.76032 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(7)] .84921 .01194 0 0 Mshowa
+P
+.004 w
+.84921 .0221 m
+.84921 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9381 .01194 0 0 Mshowa
+P
+.004 w
+.9381 .0221 m
+.9381 .08305 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(5)] .96349 .01194 0 0 Mshowa
+P
+.004 w
+.96349 .0221 m
+.96349 .08305 L
+s
+P
+P
+P
+0 0 m
+1 0 L
+1 .50133 L
+0 .50133 L
+closepath
+clip
+newpath
+MathSubEnd
+P
+% End of sub-graphic
+P
+p
+% Start of sub-graphic
+p
+0.0238095 0.272953 0.477324 0.509788 MathSubStart
+%% Graphics
+/Courier findfont 10  scalefont  setfont
+% Scaling calculations
+-0.0820106 0.10582 0.583862 0.10582 [
+[(1)] .02381 .47804 0 0 Msboxa
+[(2)] .12963 .47804 0 0 Msboxa
+[(3)] .23545 .47804 0 0 Msboxa
+[(4)] .34127 .47804 0 0 Msboxa
+[(5)] .44709 .47804 0 0 Msboxa
+[(6)] .55291 .47804 0 0 Msboxa
+[(7)] .65873 .47804 0 0 Msboxa
+[(8)] .76455 .47804 0 0 Msboxa
+[(9)] .87037 .47804 0 0 Msboxa
+[(10)] .97619 .47804 0 0 Msboxa
+[(11)] .02381 .37222 0 0 Msboxa
+[(12)] .12963 .37222 0 0 Msboxa
+[(13)] .23545 .37222 0 0 Msboxa
+[(14)] .34127 .37222 0 0 Msboxa
+[(15)] .44709 .37222 0 0 Msboxa
+[(16)] .55291 .37222 0 0 Msboxa
+[(17)] .65873 .37222 0 0 Msboxa
+[(18)] .76455 .37222 0 0 Msboxa
+[(19)] .87037 .37222 0 0 Msboxa
+[(20)] .97619 .37222 0 0 Msboxa
+[(21)] .02381 .2664 0 0 Msboxa
+[(22)] .12963 .2664 0 0 Msboxa
+[(23)] .23545 .2664 0 0 Msboxa
+[(24)] .34127 .2664 0 0 Msboxa
+[(25)] .44709 .2664 0 0 Msboxa
+[(26)] .55291 .2664 0 0 Msboxa
+[(27)] .65873 .2664 0 0 Msboxa
+[(28)] .76455 .2664 0 0 Msboxa
+[(29)] .87037 .2664 0 0 Msboxa
+[(30)] .97619 .2664 0 0 Msboxa
+[(31)] .02381 .16058 0 0 Msboxa
+[(32)] .12963 .16058 0 0 Msboxa
+[(33)] .23545 .16058 0 0 Msboxa
+[(34)] .34127 .16058 0 0 Msboxa
+[(35)] .44709 .16058 0 0 Msboxa
+[(36)] .55291 .16058 0 0 Msboxa
+[(37)] .65873 .16058 0 0 Msboxa
+[(38)] .76455 .16058 0 0 Msboxa
+[(39)] .87037 .16058 0 0 Msboxa
+[(40)] .97619 .16058 0 0 Msboxa
+[(41)] .02381 .05476 0 0 Msboxa
+[(42)] .12963 .05476 0 0 Msboxa
+[(43)] .23545 .05476 0 0 Msboxa
+[(44)] .34127 .05476 0 0 Msboxa
+[(45)] .44709 .05476 0 0 Msboxa
+[(46)] .55291 .05476 0 0 Msboxa
+[(47)] .65873 .05476 0 0 Msboxa
+[(48)] .76455 .05476 0 0 Msboxa
+[(49)] .87037 .05476 0 0 Msboxa
+[(50)] .97619 .05476 0 0 Msboxa
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .43571 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .43571 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .43571 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .43571 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .32989 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .32989 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .32989 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .32989 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .32989 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .22407 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .22407 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .22407 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .22407 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .22407 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .11825 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .11825 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .11825 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .11825 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .11825 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .01243 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .01243 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .01243 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .01243 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .01243 0 0 Msboxa
+P
+[ 0 0 0 0 ]
+[ 1 .52222 0 0 ]
+] MathScale
+% Start of Graphics
+1 setlinecap
+1 setlinejoin
+newpath
+[ ] 0 setdash
+p
+P
+p
+p
+p
+[(1)] .02381 .47804 0 0 Mshowa
+[(2)] .12963 .47804 0 0 Mshowa
+[(3)] .23545 .47804 0 0 Mshowa
+[(4)] .34127 .47804 0 0 Mshowa
+[(5)] .44709 .47804 0 0 Mshowa
+[(6)] .55291 .47804 0 0 Mshowa
+[(7)] .65873 .47804 0 0 Mshowa
+[(8)] .76455 .47804 0 0 Mshowa
+[(9)] .87037 .47804 0 0 Mshowa
+[(10)] .97619 .47804 0 0 Mshowa
+P
+p
+[(11)] .02381 .37222 0 0 Mshowa
+[(12)] .12963 .37222 0 0 Mshowa
+[(13)] .23545 .37222 0 0 Mshowa
+[(14)] .34127 .37222 0 0 Mshowa
+[(15)] .44709 .37222 0 0 Mshowa
+[(16)] .55291 .37222 0 0 Mshowa
+[(17)] .65873 .37222 0 0 Mshowa
+[(18)] .76455 .37222 0 0 Mshowa
+[(19)] .87037 .37222 0 0 Mshowa
+[(20)] .97619 .37222 0 0 Mshowa
+P
+p
+[(21)] .02381 .2664 0 0 Mshowa
+[(22)] .12963 .2664 0 0 Mshowa
+[(23)] .23545 .2664 0 0 Mshowa
+[(24)] .34127 .2664 0 0 Mshowa
+[(25)] .44709 .2664 0 0 Mshowa
+[(26)] .55291 .2664 0 0 Mshowa
+[(27)] .65873 .2664 0 0 Mshowa
+[(28)] .76455 .2664 0 0 Mshowa
+[(29)] .87037 .2664 0 0 Mshowa
+[(30)] .97619 .2664 0 0 Mshowa
+P
+p
+[(31)] .02381 .16058 0 0 Mshowa
+[(32)] .12963 .16058 0 0 Mshowa
+[(33)] .23545 .16058 0 0 Mshowa
+[(34)] .34127 .16058 0 0 Mshowa
+[(35)] .44709 .16058 0 0 Mshowa
+[(36)] .55291 .16058 0 0 Mshowa
+[(37)] .65873 .16058 0 0 Mshowa
+[(38)] .76455 .16058 0 0 Mshowa
+[(39)] .87037 .16058 0 0 Mshowa
+[(40)] .97619 .16058 0 0 Mshowa
+P
+p
+[(41)] .02381 .05476 0 0 Mshowa
+[(42)] .12963 .05476 0 0 Mshowa
+[(43)] .23545 .05476 0 0 Mshowa
+[(44)] .34127 .05476 0 0 Mshowa
+[(45)] .44709 .05476 0 0 Mshowa
+[(46)] .55291 .05476 0 0 Mshowa
+[(47)] .65873 .05476 0 0 Mshowa
+[(48)] .76455 .05476 0 0 Mshowa
+[(49)] .87037 .05476 0 0 Mshowa
+[(50)] .97619 .05476 0 0 Mshowa
+P
+P
+p
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .43571 0 0 Mshowa
+P
+.004 w
+.34127 .4463 m
+.34127 .50979 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .43571 0 0 Mshowa
+P
+.004 w
+.55291 .4463 m
+.55291 .50979 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .43571 0 0 Mshowa
+P
+.004 w
+.76455 .4463 m
+.76455 .50979 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .43571 0 0 Mshowa
+P
+.004 w
+.97619 .4463 m
+.97619 .50979 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .32989 0 0 Mshowa
+P
+.004 w
+.12963 .34048 m
+.12963 .40397 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .32989 0 0 Mshowa
+P
+.004 w
+.34127 .34048 m
+.34127 .40397 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .32989 0 0 Mshowa
+P
+.004 w
+.55291 .34048 m
+.55291 .40397 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .32989 0 0 Mshowa
+P
+.004 w
+.76455 .34048 m
+.76455 .40397 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .32989 0 0 Mshowa
+P
+.004 w
+.97619 .34048 m
+.97619 .40397 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .22407 0 0 Mshowa
+P
+.004 w
+.12963 .23466 m
+.12963 .29815 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .22407 0 0 Mshowa
+P
+.004 w
+.34127 .23466 m
+.34127 .29815 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .22407 0 0 Mshowa
+P
+.004 w
+.55291 .23466 m
+.55291 .29815 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .22407 0 0 Mshowa
+P
+.004 w
+.76455 .23466 m
+.76455 .29815 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .22407 0 0 Mshowa
+P
+.004 w
+.97619 .23466 m
+.97619 .29815 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .11825 0 0 Mshowa
+P
+.004 w
+.12963 .12884 m
+.12963 .19233 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .11825 0 0 Mshowa
+P
+.004 w
+.34127 .12884 m
+.34127 .19233 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .11825 0 0 Mshowa
+P
+.004 w
+.55291 .12884 m
+.55291 .19233 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .11825 0 0 Mshowa
+P
+.004 w
+.76455 .12884 m
+.76455 .19233 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .11825 0 0 Mshowa
+P
+.004 w
+.97619 .12884 m
+.97619 .19233 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12963 .01243 0 0 Mshowa
+P
+.004 w
+.12963 .02302 m
+.12963 .08651 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .34127 .01243 0 0 Mshowa
+P
+.004 w
+.34127 .02302 m
+.34127 .08651 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .55291 .01243 0 0 Mshowa
+P
+.004 w
+.55291 .02302 m
+.55291 .08651 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .76455 .01243 0 0 Mshowa
+P
+.004 w
+.76455 .02302 m
+.76455 .08651 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .97619 .01243 0 0 Mshowa
+P
+.004 w
+.97619 .02302 m
+.97619 .08651 L
+s
+P
+P
+P
+0 0 m
+1 0 L
+1 .52222 L
+0 .52222 L
+closepath
+clip
+newpath
+MathSubEnd
+P
+% End of sub-graphic
+% Start of sub-graphic
+p
+0.522676 0.272953 0.97619 0.509788 MathSubStart
+%% Graphics
+/Courier findfont 10  scalefont  setfont
+% Scaling calculations
+-0.080561 0.104371 0.575864 0.104371 [
+[(1)] .02381 .47149 0 0 Msboxa
+[(2)] .12818 .47149 0 0 Msboxa
+[(3)] .23255 .47149 0 0 Msboxa
+[(4)] .33692 .47149 0 0 Msboxa
+[(5)] .44129 .47149 0 0 Msboxa
+[(6)] .54566 .47149 0 0 Msboxa
+[(7)] .65003 .47149 0 0 Msboxa
+[(8)] .7544 .47149 0 0 Msboxa
+[(9)] .85877 .47149 0 0 Msboxa
+[(10)] .96314 .47149 0 0 Msboxa
+[(11)] .02381 .36712 0 0 Msboxa
+[(12)] .12818 .36712 0 0 Msboxa
+[(13)] .23255 .36712 0 0 Msboxa
+[(14)] .33692 .36712 0 0 Msboxa
+[(15)] .44129 .36712 0 0 Msboxa
+[(16)] .54566 .36712 0 0 Msboxa
+[(17)] .65003 .36712 0 0 Msboxa
+[(18)] .7544 .36712 0 0 Msboxa
+[(19)] .85877 .36712 0 0 Msboxa
+[(20)] .96314 .36712 0 0 Msboxa
+[(21)] .02381 .26275 0 0 Msboxa
+[(22)] .12818 .26275 0 0 Msboxa
+[(23)] .23255 .26275 0 0 Msboxa
+[(24)] .33692 .26275 0 0 Msboxa
+[(25)] .44129 .26275 0 0 Msboxa
+[(26)] .54566 .26275 0 0 Msboxa
+[(27)] .65003 .26275 0 0 Msboxa
+[(28)] .7544 .26275 0 0 Msboxa
+[(29)] .85877 .26275 0 0 Msboxa
+[(30)] .96314 .26275 0 0 Msboxa
+[(31)] .02381 .15838 0 0 Msboxa
+[(32)] .12818 .15838 0 0 Msboxa
+[(33)] .23255 .15838 0 0 Msboxa
+[(34)] .33692 .15838 0 0 Msboxa
+[(35)] .44129 .15838 0 0 Msboxa
+[(36)] .54566 .15838 0 0 Msboxa
+[(37)] .65003 .15838 0 0 Msboxa
+[(38)] .7544 .15838 0 0 Msboxa
+[(39)] .85877 .15838 0 0 Msboxa
+[(40)] .96314 .15838 0 0 Msboxa
+[(41)] .02381 .05401 0 0 Msboxa
+[(42)] .12818 .05401 0 0 Msboxa
+[(43)] .23255 .05401 0 0 Msboxa
+[(44)] .33692 .05401 0 0 Msboxa
+[(45)] .44129 .05401 0 0 Msboxa
+[(46)] .54566 .05401 0 0 Msboxa
+[(47)] .65003 .05401 0 0 Msboxa
+[(48)] .7544 .05401 0 0 Msboxa
+[(49)] .85877 .05401 0 0 Msboxa
+[(50)] .96314 .05401 0 0 Msboxa
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .42975 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53262 .42975 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55871 .42975 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .7544 .42975 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .85877 .42975 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .42975 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .11513 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .14123 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .44129 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54566 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74136 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76745 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .32538 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .02381 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12818 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .32387 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .34997 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54566 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .65003 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .7544 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9501 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .97619 .221 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12818 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .23255 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53262 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55871 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .7544 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .85877 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .11663 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .11513 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .14123 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .44129 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54566 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74136 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76745 .01226 0 0 Msboxa
+P
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .01226 0 0 Msboxa
+P
+[ 0 0 0 0 ]
+[ 1 .51507 0 0 ]
+] MathScale
+% Start of Graphics
+1 setlinecap
+1 setlinejoin
+newpath
+[ ] 0 setdash
+p
+P
+p
+p
+p
+[(1)] .02381 .47149 0 0 Mshowa
+[(2)] .12818 .47149 0 0 Mshowa
+[(3)] .23255 .47149 0 0 Mshowa
+[(4)] .33692 .47149 0 0 Mshowa
+[(5)] .44129 .47149 0 0 Mshowa
+[(6)] .54566 .47149 0 0 Mshowa
+[(7)] .65003 .47149 0 0 Mshowa
+[(8)] .7544 .47149 0 0 Mshowa
+[(9)] .85877 .47149 0 0 Mshowa
+[(10)] .96314 .47149 0 0 Mshowa
+P
+p
+[(11)] .02381 .36712 0 0 Mshowa
+[(12)] .12818 .36712 0 0 Mshowa
+[(13)] .23255 .36712 0 0 Mshowa
+[(14)] .33692 .36712 0 0 Mshowa
+[(15)] .44129 .36712 0 0 Mshowa
+[(16)] .54566 .36712 0 0 Mshowa
+[(17)] .65003 .36712 0 0 Mshowa
+[(18)] .7544 .36712 0 0 Mshowa
+[(19)] .85877 .36712 0 0 Mshowa
+[(20)] .96314 .36712 0 0 Mshowa
+P
+p
+[(21)] .02381 .26275 0 0 Mshowa
+[(22)] .12818 .26275 0 0 Mshowa
+[(23)] .23255 .26275 0 0 Mshowa
+[(24)] .33692 .26275 0 0 Mshowa
+[(25)] .44129 .26275 0 0 Mshowa
+[(26)] .54566 .26275 0 0 Mshowa
+[(27)] .65003 .26275 0 0 Mshowa
+[(28)] .7544 .26275 0 0 Mshowa
+[(29)] .85877 .26275 0 0 Mshowa
+[(30)] .96314 .26275 0 0 Mshowa
+P
+p
+[(31)] .02381 .15838 0 0 Mshowa
+[(32)] .12818 .15838 0 0 Mshowa
+[(33)] .23255 .15838 0 0 Mshowa
+[(34)] .33692 .15838 0 0 Mshowa
+[(35)] .44129 .15838 0 0 Mshowa
+[(36)] .54566 .15838 0 0 Mshowa
+[(37)] .65003 .15838 0 0 Mshowa
+[(38)] .7544 .15838 0 0 Mshowa
+[(39)] .85877 .15838 0 0 Mshowa
+[(40)] .96314 .15838 0 0 Mshowa
+P
+p
+[(41)] .02381 .05401 0 0 Mshowa
+[(42)] .12818 .05401 0 0 Mshowa
+[(43)] .23255 .05401 0 0 Mshowa
+[(44)] .33692 .05401 0 0 Mshowa
+[(45)] .44129 .05401 0 0 Mshowa
+[(46)] .54566 .05401 0 0 Mshowa
+[(47)] .65003 .05401 0 0 Mshowa
+[(48)] .7544 .05401 0 0 Mshowa
+[(49)] .85877 .05401 0 0 Mshowa
+[(50)] .96314 .05401 0 0 Mshowa
+P
+P
+p
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .42975 0 0 Mshowa
+P
+.004 w
+.33692 .44018 m
+.33692 .5028 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53262 .42975 0 0 Mshowa
+P
+.004 w
+.53262 .44018 m
+.53262 .5028 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55871 .42975 0 0 Mshowa
+P
+.004 w
+.55871 .44018 m
+.55871 .5028 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .7544 .42975 0 0 Mshowa
+P
+.004 w
+.7544 .44018 m
+.7544 .5028 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .85877 .42975 0 0 Mshowa
+P
+.004 w
+.85877 .44018 m
+.85877 .5028 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .42975 0 0 Mshowa
+P
+.004 w
+.96314 .44018 m
+.96314 .5028 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .11513 .32538 0 0 Mshowa
+P
+.004 w
+.11513 .33581 m
+.11513 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .14123 .32538 0 0 Mshowa
+P
+.004 w
+.14123 .33581 m
+.14123 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .32538 0 0 Mshowa
+P
+.004 w
+.33692 .33581 m
+.33692 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .44129 .32538 0 0 Mshowa
+P
+.004 w
+.44129 .33581 m
+.44129 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54566 .32538 0 0 Mshowa
+P
+.004 w
+.54566 .33581 m
+.54566 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74136 .32538 0 0 Mshowa
+P
+.004 w
+.74136 .33581 m
+.74136 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76745 .32538 0 0 Mshowa
+P
+.004 w
+.76745 .33581 m
+.76745 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .32538 0 0 Mshowa
+P
+.004 w
+.96314 .33581 m
+.96314 .39843 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .02381 .221 0 0 Mshowa
+P
+.004 w
+.02381 .23144 m
+.02381 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12818 .221 0 0 Mshowa
+P
+.004 w
+.12818 .23144 m
+.12818 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .32387 .221 0 0 Mshowa
+P
+.004 w
+.32387 .23144 m
+.32387 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .34997 .221 0 0 Mshowa
+P
+.004 w
+.34997 .23144 m
+.34997 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54566 .221 0 0 Mshowa
+P
+.004 w
+.54566 .23144 m
+.54566 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .65003 .221 0 0 Mshowa
+P
+.004 w
+.65003 .23144 m
+.65003 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .7544 .221 0 0 Mshowa
+P
+.004 w
+.7544 .23144 m
+.7544 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .9501 .221 0 0 Mshowa
+P
+.004 w
+.9501 .23144 m
+.9501 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .97619 .221 0 0 Mshowa
+P
+.004 w
+.97619 .23144 m
+.97619 .29406 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .12818 .11663 0 0 Mshowa
+P
+.004 w
+.12818 .12707 m
+.12818 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .23255 .11663 0 0 Mshowa
+P
+.004 w
+.23255 .12707 m
+.23255 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .11663 0 0 Mshowa
+P
+.004 w
+.33692 .12707 m
+.33692 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .53262 .11663 0 0 Mshowa
+P
+.004 w
+.53262 .12707 m
+.53262 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .55871 .11663 0 0 Mshowa
+P
+.004 w
+.55871 .12707 m
+.55871 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .7544 .11663 0 0 Mshowa
+P
+.004 w
+.7544 .12707 m
+.7544 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .85877 .11663 0 0 Mshowa
+P
+.004 w
+.85877 .12707 m
+.85877 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .11663 0 0 Mshowa
+P
+.004 w
+.96314 .12707 m
+.96314 .18969 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .11513 .01226 0 0 Mshowa
+P
+.004 w
+.11513 .0227 m
+.11513 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .14123 .01226 0 0 Mshowa
+P
+.004 w
+.14123 .0227 m
+.14123 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .33692 .01226 0 0 Mshowa
+P
+.004 w
+.33692 .0227 m
+.33692 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .44129 .01226 0 0 Mshowa
+P
+.004 w
+.44129 .0227 m
+.44129 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .54566 .01226 0 0 Mshowa
+P
+.004 w
+.54566 .0227 m
+.54566 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .74136 .01226 0 0 Mshowa
+P
+.004 w
+.74136 .0227 m
+.74136 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(3)] .76745 .01226 0 0 Mshowa
+P
+.004 w
+.76745 .0227 m
+.76745 .08532 L
+s
+P
+p
+p
+/Times-Roman findfont 9 scalefont setfont
+[(2)] .96314 .01226 0 0 Mshowa
+P
+.004 w
+.96314 .0227 m
+.96314 .08532 L
+s
+P
+P
+P
+0 0 m
+1 0 L
+1 .51507 L
+0 .51507 L
+closepath
+clip
+newpath
+MathSubEnd
+P
+% End of sub-graphic
+P
+P
+% End of Graphics
+MathPictureEnd
+\
+\>"], "Graphics",
+ Evaluatable->False,
+ AspectRatioFixed->True,
+ ImageSize->{405, 210},
+ ImageMargins->{{54, 0}, {0, 0}},
+ ImageRegion->{{0, 1}, {0, 
+  1}},ImageCache->GraphicsData["CompressedBitmap", "\<\
+eJztXemOHLcRbs307KVdayU5WlnXjqQEiS4neQnLCRAgUewHEIwA9o8ggeNX
+SR4sv/I2Gw+bwyKrvyoWuznHrlqAvRw2j7pYJKvI4p8+/vT93/7+8acfvvu4
+fP/jx39+/8N3/1p+9Y8ff86a32qaW/9umua/y2aVvvo56f/n/v1n9T//Y4Pp
+y9Wfw1W/y1VqsUrdXqXmq9RslWpXqdPw9dkqdbRKPV2ljlepV6GV1jXrKl/5
+f83jkpZdK3dAK6eh33sd6EtQaA7ynoE81AGqewLyUL8i2ixvAfJ+LcKyiPO6
+D2sybRgfVPcU5J0ZadHB1zwHn2Yg7xLkfWYE8/YIFJ8Y0fmNEQ+Uh/qojRvq
+F7EK5aF+Y/bNnBC23YdOZa3+o2+uUVe/a2tdonFfPwvlqMYspC6pB1D3rctp
+A2j+IxpUTyXqUYetpGmWuJtzUNRhs4iUkkMgGrjRX8iVp0r52wwOn0/UOlMq
+PwNICLTtJPIANROqvM7ihbtC0j67qoOcnconuLMzDLire7/LWIaMvsjTNxJ5
+Nq/N03KzkHoKaryivha8L0L4SXGvfchpztUH690uZ7zaxjOZPPjyfaEBjsq9
+FsthmFD/XBRr4SCrZNyXl0nGd5c6SfNakMfKRfwOUBTVoGHsvqJ54zj9ympQ
+H8cBZir3SIKlBdJKrbAa1BvCF9XYHL5ohCHM/VSCFgWicpulTaC1GlrIHPkv
+TDEauom+NmuqIT2PmjouxgxNMWvaGtDsOlxwNAnKR0aIOORNgA1PRogsMoAm
+PhwHouwbH3rgi0MEAchGW7fa6gS5lRo7Cl9F4XZf0QrxIHwVdQnsd1XkSKqL
+qHeoAklfBdoySEirafL8UCUbNRktDfw/V12nHIGMKEd194dySPcj3ZETRIaM
+RaN6WNpAW6RC9K+0Jmagca3h+2LzKmqN1gfsq8jvfjc026CG5qySzyf+C0x7
+aKSzRRNH/Xq+SGRHGIhkF1i8F2QnoNGAIp0nIldH3LURyVo9kOCsMQoMdEKY
+yjCNwVQbEtLcX3986MJhIMRhCXM0+dgr5lhoo1gr8Cg6C9/RfoDlUTnah2QX
+XWzLd8wqcRyTdudpNREmNjuhfZqIowgGW8bO0y4FlNEudyMo29Zi8W5tspFs
+BoeBNpKJHZvBYWJHVO7assP9zniGHctcK44Bro87aR5ZnJkHmWo4YJyP+J3a
+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
+oNHTHCR+tXDDVog3DB33o/KDrs2t/wOENT9M\
+\>"],ImageRangeCache->{{{0, 404}, {209, 0}} -> {0, 0, 0, 0}, {{11.375, \
+192.875}, {204, 109.188}} -> {0, -5, 0, 0}, {{211.062, 392.562}, {204, \
+109.188}} -> {-10, -5, 0, 0}, {{11.375, 192.875}, {99.75, 4.9375}} -> {0, \
+-11, 0, 0}, {{211.062, 392.562}, {99.75, 4.9375}} -> {-10, -11, 0, 0}}],
+
+Cell[OutputFormData["\<\
+GraphicsArray[\"<<>>\"]\
+\>", "\<\
+-GraphicsArray-\
+\>"], "Output",
+ Evaluatable->False,
+ AspectRatioFixed->True]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowToolbars->{},
+WindowSize->{760, 762},
+WindowMargins->{{Automatic, 357}, {Automatic, -6}},
+PrivateNotebookOptions->{"ColorPalette"->{RGBColor, -1}},
+ShowCellLabel->True,
+ShowCellTags->False,
+RenderingOptions->{"ObjectDithering"->True,
+"RasterDithering"->False},
+FrontEndVersion->"9.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (March 5, \
+2013)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 38, 0, 92, "Title"],
+Cell[CellGroupData[{
+Cell[642, 26, 28, 0, 44, "Subsection"],
+Cell[673, 28, 55, 3, 49, "Text"],
+Cell[731, 33, 297, 9, 49, "Text"],
+Cell[1031, 44, 313, 10, 49, "Text"],
+Cell[1347, 56, 99, 2, 30, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1483, 63, 26, 0, 44, "Subsection"],
+Cell[1512, 65, 154, 4, 28, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1703, 74, 30, 0, 44, "Subsection"],
+Cell[1736, 76, 74, 0, 30, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1847, 81, 26, 0, 44, "Subsection"],
+Cell[1876, 83, 6036, 154, 369, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7949, 242, 26, 0, 70, "Subsection"],
+Cell[7978, 244, 52, 3, 70, "Text"],
+Cell[8033, 249, 1655, 50, 70, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9725, 304, 26, 0, 70, "Section"],
+Cell[CellGroupData[{
+Cell[9776, 308, 72, 1, 70, "Input"],
+Cell[9851, 311, 54890, 3042, 70, 47477, 2918, "GraphicsData", "PostScript", \
+"Graphics",
+ Evaluatable->False],
+Cell[64744, 3355, 138, 6, 70, "Output",
+ Evaluatable->False]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+
