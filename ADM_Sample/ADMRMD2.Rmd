@@ -1,0 +1,297 @@
+---
+title: "ADMProject2"
+author: "Jesse Elder"
+date: "5/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(jpeg)
+library(tidyverse)
+library(Rcpp)
+library(RcppEigen)
+library(RcppArmadillo)
+library(microbenchmark)
+library(bigmemory)
+library(BH)
+library(RMark)
+library(pryr)
+#Supplementary C++ functions for fast matrix multiplication
+sourceCpp("ADMCPP.cpp")
+sourceCpp("ADMUnrolling.cpp")
+```
+
+
+
+###Helper Functions
+```{r}
+##############Helper Functions
+
+imageConv <- function(inCat,depth=128){
+  matrix(inCat,nrow=depth,byrow=T)    
+}
+
+flatConv <- function(inCat){
+  matrix(t(inCat),nrow=128*128,ncol=1)[,1]
+}
+
+###############Helper Functions
+```
+
+
+
+
+
+
+```{r}
+#Function to read in the letter images (dynamically, i.e. grab ALL of them)
+Letters<-function(Lett){
+  Photoframe<-matrix(nrow=128*128,ncol=30)
+  for(i in c(1:30)){
+    figs<-try(readJPEG(paste("Letter",Lett,as.character(i),".jpg",sep="")),TRUE) #If not .jpg then
+    if(class(figs)=="try-error"){
+      figs<-readJPEG(paste("Letter",Lett,as.character(i),".jpeg",sep="")) #Maybe it's a .jpeg
+    }
+    Jpeg <- try(255*figs[,,1],TRUE) #If there's some unknown error
+    if(class(Jpeg)=="try-error"){ #Skip the error images!
+      next()
+    }
+    Jpeg <- t(Jpeg[128:1,])
+    Flat<-matrix(t(Jpeg),nrow=128*128)
+    Photoframe[,i]<-Flat
+    #print(i)
+  }
+  Photoframe<-Photoframe[,!is.na(Photoframe[1,])] #Remove any fakers
+  return(Photoframe)
+}
+
+
+
+
+#Singular Value Decomposition
+SBD<-function(Let){
+  meanO <- colMeans(get(paste0("Photoframe",Let)))
+  meanOMat <- matrix(rep(meanO,each=128*128),nrow=128*128)
+  O0 <- get(paste0("Photoframe",Let))-meanOMat
+  #Actual SVD analysis
+  O.svd <- svd(O0)
+
+  U <- O.svd$u
+  return(U)
+}
+```
+
+
+
+Create Photoframes of of Letter so we have all 30 images of each letter in their own named data frame. Then show the function works. Then perform SVD on the images and collect the U's into matrices named after their corresponding letter.
+
+###Assignments
+```{r}
+par(mfrow=c(3,3),mai=c(0.02,0.,0,0))
+for(L in c("A","B","E","L","N","O","T","U","Y")){
+  assign(paste0("Photoframe",L),Letters(L))
+  image(imageConv(get(paste0("Photoframe",L))[,1]),col=grey.colors(256))
+  assign(paste0("U",L),SBD(L))
+}
+
+```
+
+
+Do some work to optimize matrix multiplication. Which algorithm works best?
+
+###Optimization
+```{r OptimizationOne}
+#microbenchmark(t(UA),armaTrans(UA),crossprod(t(UA)),UA%*%t(UA),time=1L)
+gc() #Clear out any memory left over
+```
+```{r OptimizationTwo}
+microbenchmark(armaMatMult(UA, t(UA)),
+      eigenMatMult(UA,t(UA)),eigenMapMatMult(UA,t(UA)),times=1L)
+sum((crossprod(t(UA)) == UA %*% t(UA))[1:250]) #Ok these definitely work the same!
+gc() #Clear out any memory left over again
+```
+
+Generally speaking, the cross product function is the fastest. We will employ this first.
+Next we'll have to do the computationally hard part. Take my word for it that converting these matrices to big.matrix does actually save time in the long run. It does take a minute to do right now though.
+
+Note here that R normally would have no problem with taking all of these big matrices in. R collects garbage after a while, but when running these they seem to keep some memory left over after each one. R has a hard time removing this memory it seems. This easily leads to running out of RAM. As such, we force R to do garbage collection after every big matrix.
+
+#Big Matrices
+```{r BigMatrices}
+for(L in c("A","B","E","L","N","O","T","U","Y")){
+  assign(paste0("bigU",L),as.big.matrix(crossprod(t(get(paste0("U",L))))))
+  gc() #So much garbage to pick up!
+  #So this takes forever...
+}
+```
+
+
+
+
+
+
+
+
+
+
+This is the real deal!
+Here we're going to load in some samples of words and of 128 height and 128*# of letters width so we can look at # of letters frames of reference and compare the mse's of the SVP letters to the EigenLetters. The one with the lowest mse is the decided letter.
+
+```{r}
+Boolean<-readJPEG("Boolean.jpg")
+jpg<-255*Boolean[,,1]
+FlatBoolean<-matrix(jpg[128:1,],nrow=dim(Boolean)[2],byrow=T) 
+WordBoolean<-matrix(jpg[128:1,],nrow=128*128,ncol=dim(Boolean)[2]/128)
+
+
+Bully<-readJPEG("Bully.jpg")
+jpg<-255*Bully[,,1]
+FlatBully<-matrix(jpg[128:1,],nrow=dim(Bully)[2],byrow=T) 
+WordBully<-matrix(jpg[128:1,],nrow=128*128,ncol=dim(Bully)[2]/128)
+
+
+Beauty<-readJPEG("BEAUTY.jpg")
+jpg<-255*Beauty[,,1]
+FlatBeauty<-matrix(jpg[128:1,],nrow=dim(Beauty)[2],byrow=T) 
+WordBeauty<-matrix(jpg[128:1,],nrow=128*128,ncol=dim(Beauty)[2]/128)
+dim(WordBeauty)
+
+par(mfrow=c(3,1),mai=c(0.02,0.,0,0))
+image(FlatBoolean,col=grey.colors(256))
+image(FlatBully,col=grey.colors(256))
+image(FlatBeauty,col=grey.colors(256))
+
+```
+
+
+
+Here we go!!!
+#Results
+```{r ResultsOne}
+for(i in 1:(dim(WordBoolean)[2])){
+  Samp1<- WordBoolean[,i]
+  for(L in c("A","B","E","L","N","O","T","U","Y")){
+    assign(paste0("Samp1",L,"Hat"),
+           prod4(get(paste0("bigU",L))@address,Samp1))
+    assign(paste0(L,"err"),
+           mean((Samp1-get(paste0("Samp1",L,"Hat")))^2))
+  }
+  
+  minerr<-which.min(c(Aerr,Berr,Eerr,Lerr,Nerr,Oerr,Terr,Uerr,Yerr))
+
+  if(minerr==1){
+    print(paste0("Letter number",as.character(i),"is an A"))
+  }else if(minerr==2){
+    print(paste0("Letter number",as.character(i),"is a B"))
+  }else if(minerr==3){
+    print(paste0("Letter number",as.character(i),"is a E"))
+  }else if(minerr==4){
+    print(paste0("Letter number",as.character(i),"is a L"))
+  }else if(minerr==5){
+    print(paste0("Letter number",as.character(i),"is a N"))
+  }else if(minerr==6){
+    print(paste0("Letter number",as.character(i),"is a O"))
+  }else if(minerr==7){
+    print(paste0("Letter number",as.character(i),"is a T"))
+  }else if(minerr==8){
+    print(paste0("Letter number",as.character(i),"is a U"))
+  }else{
+    print(paste0("Letter number",as.character(i),"is a Y"))
+  }
+  print(i)
+}
+
+```
+
+
+
+```{r ResultsTwo}
+for(i in 1:(dim(WordBully)[2])){
+  Samp1<- WordBully[,i]
+  for(L in c("A","B","E","L","N","O","T","U","Y")){
+    assign(paste0("Samp1",L,"Hat"),
+           prod4(get(paste0("bigU",L))@address,Samp1))
+    assign(paste0(L,"err"),
+           mean((Samp1-get(paste0("Samp1",L,"Hat")))^2))
+  }
+  
+  minerr<-which.min(c(Aerr,Berr,Eerr,Lerr,Nerr,Oerr,Terr,Uerr,Yerr))
+
+  if(minerr==1){
+    print(paste0("Letter number",as.character(i),"is an A"))
+  }else if(minerr==2){
+    print(paste0("Letter number",as.character(i),"is a B"))
+  }else if(minerr==3){
+    print(paste0("Letter number",as.character(i),"is a E"))
+  }else if(minerr==4){
+    print(paste0("Letter number",as.character(i),"is a L"))
+  }else if(minerr==5){
+    print(paste0("Letter number",as.character(i),"is a N"))
+  }else if(minerr==6){
+    print(paste0("Letter number",as.character(i),"is a O"))
+  }else if(minerr==7){
+    print(paste0("Letter number",as.character(i),"is a T"))
+  }else if(minerr==8){
+    print(paste0("Letter number",as.character(i),"is a U"))
+  }else{
+    print(paste0("Letter number",as.character(i),"is a Y"))
+  }
+  print(i)
+}
+```
+
+
+```{r ResultsThree}
+for(i in 1:(dim(WordBeauty)[2])){
+  Samp1<- WordBeauty[,i]
+  for(L in c("A","B","E","L","N","O","T","U","Y")){
+    assign(paste0("Samp1",L,"Hat"),
+           prod4(get(paste0("bigU",L))@address,Samp1))
+    assign(paste0(L,"err"),
+           mean((Samp1-get(paste0("Samp1",L,"Hat")))^2))
+  }
+  
+  minerr<-which.min(c(Aerr,Berr,Eerr,Lerr,Nerr,Oerr,Terr,Uerr,Yerr))
+
+  if(minerr==1){
+    print(paste0("Letter number",as.character(i),"is an A"))
+  }else if(minerr==2){
+    print(paste0("Letter number",as.character(i),"is a B"))
+  }else if(minerr==3){
+    print(paste0("Letter number",as.character(i),"is a E"))
+  }else if(minerr==4){
+    print(paste0("Letter number",as.character(i),"is a L"))
+  }else if(minerr==5){
+    print(paste0("Letter number",as.character(i),"is a N"))
+  }else if(minerr==6){
+    print(paste0("Letter number",as.character(i),"is a O"))
+  }else if(minerr==7){
+    print(paste0("Letter number",as.character(i),"is a T"))
+  }else if(minerr==8){
+    print(paste0("Letter number",as.character(i),"is a U"))
+  }else{
+    print(paste0("Letter number",as.character(i),"is a Y"))
+  }
+  print(i)
+}
+```
+
+
+
+It appears that although I put in a valiant effort (along with my computer), this method is still flawed. The predicted words aren't terribly far off, but they certainly do not actually spell correctly. Suppose the algorithm randomly chose a letter: you'd expect a 1 in 9 chance of being correct. Fortunately, our SVP has given much better odds than that.
+Some things to do in the future are include the entire alphabet and maybe even the 10 digits. It would also be prudent to increase the sample size of the photos. Until next time, I'm happy.
+
+
+
+
+
+
+
+
+
+
+
