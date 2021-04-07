@@ -1,0 +1,291 @@
+---
+title: "Stats4GeneticsHW5"
+author: "Jesse Elder"
+date: "11/5/2020"
+output: pdf_document
+---
+
+
+
+
+```{r,include=FALSE}
+#install.packages("haplo.stats")
+library(haplo.stats)
+library(tidyverse)
+```
+
+$\\$
+$\\$
+
+
+Using the $\bf{FAMuSS}$ data, estimate the resistin haplotype frequencies for Caucasians and African Americans separately.
+$\\$
+
+# Problem 1
+```{r,include=FALSE}
+fms <- read.delim("http://www.biostat.umn.edu/~cavanr/FMS_data.txt", header=T, sep="\t")
+attach(fms)
+```
+
+```{r}
+#A Haplotype is a list of ALL COMBINATIONS OF SNPs and the frequency of those combinations
+
+#Take only resistin data drom FAMuSS
+llamo<-names(fms)[substr(names(fms),1,8)=="resistin"]
+NewGen<-fms[,is.element(names(fms),llamo)]
+#NewGen
+
+#resistin haplotype frequencies
+Geno <- cbind(substr(resistin_c30t,1,1), substr(resistin_c30t,2,2), substr(resistin_c398t,1,1), substr(resistin_c398t,2,2), substr(resistin_g540a,1,1), substr(resistin_g540a,2,2), substr(resistin_c980g,1,1), substr(resistin_c980g,2,2), substr(resistin_c180g,1,1), substr(resistin_c180g,2,2), substr(resistin_a537c,1,1), substr(resistin_a537c,2,2))
+
+
+###Do Expectation-Maximization on haplotypes
+#caucasians
+Geno.C <- Geno[Race=="Caucasian" & !is.na(Race),]
+#Geno.C
+
+HaploEM <- haplo.em(Geno.C,locus.label=llamo,control=haplo.em.control(min.posterior=1e-4))
+#HaploEM
+
+
+#african americans
+Geno.AA <- Geno[Race=="African Am" & !is.na(Race),]
+HaploEM2 <- haplo.em(Geno.AA,locus.label=llamo,control=haplo.em.control(min.posterior=1e-4))
+#HaploEM2[5]
+#HaploEM2
+
+```
+
+
+
+### Example 5.3 Haplotype Functions
+```{r}
+HapDesign <- function(HaploEM){
+	Nobs <- length(unique(HaploEM$indx.subj)) # number of observations
+	Nhap <- length(HaploEM$hap.prob)	# number of haplotypes
+	XmatHap <- matrix(data=0,nrow=Nobs,ncol=Nhap)
+	for (i in 1:Nobs){
+		IDSeq <- seq(1:sum(HaploEM$nreps))[HaploEM$indx.subj==i]
+		for (j in 1:length(IDSeq)){
+			XmatHap[i,HaploEM$hap1code[IDSeq][j]] <- 
+				XmatHap[i,HaploEM$hap1code[IDSeq][j]] + 
+				HaploEM$post[IDSeq][j]
+			XmatHap[i,HaploEM$hap2code[IDSeq][j]] <- 
+				XmatHap[i,HaploEM$hap2code[IDSeq][j]] + 
+				HaploEM$post[IDSeq][j]
+			}
+		}	
+	return(XmatHap)
+}
+
+HapFreqSE <- function(HaploEM){
+	HapMat <- HapDesign(HaploEM)
+	Nobs <- length(unique(HaploEM$indx.subj)) # number of observations
+	Nhap <- length(HaploEM$hap.prob)	# number of haplotypes
+	S.Full<-matrix(data=0, nrow=Nobs, ncol=Nhap-1)
+	for(i in 1:Nobs){
+		for(k in 1:(Nhap-1)){
+		S.Full[i,k]<-HapMat[i,k]/HaploEM$hap.prob[k]-
+			HapMat[i,Nhap]/HaploEM$hap.prob[Nhap]
+		}
+	}
+	Score<-t(S.Full)%*%S.Full
+	invScore<-solve(Score)
+	HapSE<-c(sqrt(diag(invScore)), 
+		sqrt(t(rep(1,Nhap-1))%*%invScore%*%rep(1,Nhap-1)))
+	return(HapSE)
+	}
+```
+
+### Finishing up Problem 1
+```{r}
+#Find the most common haplotype and then find the matching haplotypes between groups
+check<-HaploEM$haplotype[which.max(HaploEM$hap.prob),]
+
+HaploEM$haplotype[8,]==check  #Yup it worked
+HaploEM2$haplotype[5,]==check #EM1 row 8 is EM2 row 5
+
+FreqDiff <- HaploEM2$hap.prob[5] - HaploEM$hap.prob[8]
+s1 <- HapFreqSE(HaploEM)[8] 
+s2 <- HapFreqSE(HaploEM2)[5]
+SE <- sqrt(s1^2 + s2^2)
+CI <- c(FreqDiff - 1.96*SE, FreqDiff + 1.96*SE)
+CI
+```
+Since the confidence interval doesn't contain zero, we can conclude that the haplotype for african americans that is also most common in caucasians is significantly less common in african americans.
+
+$\\$
+$\\$
+
+Based on the $\bf{HGDP}$ data, estimate the $\bf{AKT1}$ haplotype frequencies within groups defined by the variable $\underline{Population}$. 
+
+# Problem 2
+```{r,include=FALSE}
+hgdp_akt1 <- read.delim("http://www.biostat.umn.edu/~cavanr/HGDP_AKT1.txt", header=T, sep="\t")
+attach(hgdp_akt1)
+```
+
+```{r}
+
+hags<-hgdp_akt1[,7:10]
+
+#Names of SNPs
+llamo<-c("AKT1.C0756A", "AKT1.C6024T", "AKT1.G2347T", "AKT1.G2375A")
+
+
+###Change this into 2X24 akt1 SNPs
+Geno <- cbind(substr(hgdp_akt1$AKT1.C0756A,1,1), substr(hgdp_akt1$AKT1.C0756A,2,2), 
+              substr(hgdp_akt1$AKT1.C6024T,1,1), substr(hgdp_akt1$AKT1.C6024T,2,2),
+              substr(hgdp_akt1$AKT1.G2347T,1,1), substr(hgdp_akt1$AKT1.G2347T,2,2),
+              substr(hgdp_akt1$AKT1.G2375A,1,1), substr(hgdp_akt1$AKT1.G2375A,2,2))
+
+###Change this into 2X24 akt1 SNPs
+
+
+###Do EM looping through levels of "Population" variable
+levels(as.factor(Population))
+listy<-list()
+for(i in 1:length(levels(as.factor(Population)))){
+  Geno.C <- Geno[Population==levels(as.factor(Population))[i] & !is.na(Population),]
+  
+  HaploEM <- haplo.em(Geno.C,locus.label=llamo,control=haplo.em.control(min.posterior=1e-4))
+  listy[[i]]<-cbind(HaploEM$haplotype,hap.prob=HaploEM$hap.prob)
+}
+listy[[52]]  #It works! This is for population 52
+
+#Finding most common haplotype by population
+listy2<-list()
+for(j in 1:52){
+  listy2[[j]]<-listy[[j]][which.max(listy[[j]]$hap.prob),] #Look at the most common haplotype for each population
+}
+###Do EM looping through levels of "Population" variable
+
+listy2[[1]]
+
+```
+
+
+$\\$
+$\\$
+
+
+Is there an association between $\underline{Gender}$ and $\underline{Geographic.origin}$ in the $\bf{HGDP}$ data?
+
+# Problem 3
+```{r}
+lads<-ifelse(hgdp_akt1$Gender=="M",1,0)
+hmod<-lm(lads~hgdp_akt1$Geographic.origin);summary(hmod)
+
+
+tab<-table(hgdp_akt1$Gender,hgdp_akt1$Geographic.origin) #Looks like this is right
+
+chisq.test(tab)
+```
+There is a significant relationship between gender and geographic origin. This means that it's important to stratify by gender when finding associations between haplotypes and a given trait.
+
+
+$\\$
+$\\$
+
+
+Apply $\bf{haploytpe \ trend \ regression \ (HTR)}$ to determine if there is an association between the $\underline{resistin \ haplotypes}$ and change in $\underline{nondominant \ arm \ muscle \  strength}$ within $\underline{African \ Americans}$ using the FAMuSS data.
+
+# Problem 4
+```{r}
+llamo<-names(fms)[substr(names(fms),1,8)=="resistin"] #only resistin
+Geno <- cbind(substr(resistin_c30t,1,1), substr(resistin_c30t,2,2), substr(resistin_c398t,1,1), substr(resistin_c398t,2,2), substr(resistin_g540a,1,1), substr(resistin_g540a,2,2), substr(resistin_c980g,1,1), substr(resistin_c980g,2,2), substr(resistin_c180g,1,1), substr(resistin_c180g,2,2), substr(resistin_a537c,1,1), substr(resistin_a537c,2,2))
+
+
+
+Geno.AA <- Geno[Race=="African Am" & !is.na(Race),] #only data for african americans
+Geno.AA <- setupGeno(Geno.AA)
+
+#Use expectation-maximization
+HaploEM <- haplo.em(Geno.AA,locus.label=llamo,control=haplo.em.control(min.posterior=1e-4))
+
+HapMat <- HapDesign(HaploEM)
+Trait <- NDRM.CH[Race=="African Am" & !is.na(Race)]
+mod1 <- (lm(Trait~HapMat))   
+mod2 <- (lm(Trait~1))        #the null model
+
+summary(mod1)
+summary(mod2)
+
+anova(mod1,mod2)
+```
+The HapMat model is not significant for any variable.
+Additionally, the results of the anova suggest that the addition of the HapMat variables to the model does not significantly improve it compared to the null model.
+
+$\\$
+$\\$
+
+
+Using the expectation-maximization approach of the haplo.glm() function, determine if there is an association between the $\underline{resistin \ haplotypes}$ and change in $\underline{nondominant \ arm \ muscle \ strength}$, as measured by NDRM.CH, within African Americans, based on the FAMuSS data. Consider both dominant and additive genetic models.
+
+# Problem 5
+```{r,include=FALSE}
+# Example 5.6 (EM for estimation and testing of haplotype-traitassociation)
+library(haplo.stats)
+attach(fms)
+```
+
+```{r}
+llamo<-names(fms)[substr(names(fms),1,8)=="resistin"] #only resistin
+
+Geno <- cbind(substr(resistin_c30t,1,1), substr(resistin_c30t,2,2), substr(resistin_c398t,1,1), substr(resistin_c398t,2,2), substr(resistin_g540a,1,1), substr(resistin_g540a,2,2), substr(resistin_c980g,1,1), substr(resistin_c980g,2,2), substr(resistin_c180g,1,1), substr(resistin_c180g,2,2), substr(resistin_a537c,1,1), substr(resistin_a537c,2,2))
+
+#african americans
+Geno.AA <- Geno[Race=="African Am" & !is.na(Race),]
+Geno.AA <- setupGeno(Geno.AA)
+Trait <- NDRM.CH[Race=="African Am" & !is.na(Race)]
+
+
+Dat <- data.frame(Geno.AA=Geno.AA, Trait=Trait)
+
+#haplo.glm's!!!
+hap1<-haplo.glm(Trait~Geno.AA,data=Dat,allele.lev=attributes(Geno.AA)$unique.alleles,control=haplo.glm.control(haplo.effect="dominant")) #dominant model
+hap2<-haplo.glm(Trait~Geno.AA,data=Dat,allele.lev=attributes(Geno.AA)$unique.alleles,control=haplo.glm.control(haplo.effect="additive")) #addidtive model
+
+summary(hap1)
+summary(hap2)
+#Sadly neither are at all significant
+```
+For both dominant and additive models there is no significant association between haplotype and non-dominant arm strength within African Americans
+
+$\\$
+$\\$
+
+
+Examine the fit of the model you fit in the $\textit{previous problem}$ -- do the residuals look approximately normal? Compare to a model that uses a logarithmic transformation.  Does gender have an impact on the change in the non-dominant arm muscle strength in this subpopulation? Is there an impact of gender when you consider the effect of the resistin haplotypes?  Explain your findings.
+
+# Problem 6
+```{r}
+hist(hap1$residuals)
+hist(hap2$residuals)
+
+#haplo.glm's!!!
+hap1log<-haplo.glm(log(Trait)~Geno.AA,data=Dat,allele.lev=attributes(Geno.AA)$unique.alleles,control=haplo.glm.control(haplo.effect="dominant"))
+hap2log<-haplo.glm(log(Trait)~Geno.AA,data=Dat,allele.lev=attributes(Geno.AA)$unique.alleles,control=haplo.glm.control(haplo.effect="additive"))
+
+summary(hap1log)
+summary(hap2log)
+
+hist(hap1log$residuals)
+hist(hap2log$residuals)
+
+
+Gendre<-fms$Gender[Race=="African Am" & !is.na(Race)]
+linmod<-lm(Trait~Gendre); summary(linmod) #There is a significant relationship
+
+
+hap1Gen<-haplo.glm(Trait~Geno.AA+Gendre,data=Dat,allele.lev=attributes(Geno.AA)$unique.alleles,control=haplo.glm.control(haplo.effect="dominant"))
+hap2Gen<-haplo.glm(Trait~Geno.AA+Gendre,data=Dat,allele.lev=attributes(Geno.AA)$unique.alleles,control=haplo.glm.control(haplo.effect="additive"))
+
+summary(hap1Gen)
+summary(hap2Gen)
+```
+They both look a *little* bit normal. The dominant model is less so. The dominant model almost looks trimodal. However, the additive model looks roughly normal and can be considered so.
+When log transformed, both of the models' residuals more normally distributed.
+Gender has a significant impact on change in non-domninant arm strength. Specifically males have a significantly lower change in non-dom arm strength.
+When you consider gender along with the the haplotypes, neither the difference in gender or haplotype have a significant impact on change in non-dom arm strength.
+
